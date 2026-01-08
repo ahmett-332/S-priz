@@ -62,7 +62,7 @@
             font-weight: 300;
         }
         @media (max-width: 600px) {
-            .final-msg { padding: 20px 25px; font-size: 1rem; line-height: 1.9; max-width: 88vw; word-break: keep-all; overflow-wrap: break-word; }
+            .final-msg { padding: 18px 22px; font-size: 0.95rem; line-height: 1.8; max-width: 85vw; white-space: pre-line; word-wrap: break-word; hyphens: none; -webkit-hyphens: none; }
             #cursor { display: none; }
             body { cursor: auto; }
             #phase-dots { bottom: 70px; gap: 10px; }
@@ -130,8 +130,8 @@ var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.
 var isPortrait = window.innerHeight > window.innerWidth;
 
 var quotes = ["seni düşünüyorum", "her gün", "seninle tanışmak istiyorum", "seni çok merak ediyorum", "kalbimdesin"];
-var finalText = "Ayşe,\n\nGözlerini gördüm, çok tatlıydı.\nSesini duymak için sabırsızlanıyorum.\n\nEn sevdiğim renk kahverengi,\nsenin için mor oldu.\n\nMor senin, kahverengi benim.";
-var THRESHOLDS = isMobile ? [0, 30, 70, 120, 180, 260, 350] : [0, 40, 100, 180, 280, 400, 550];
+var finalText = "Ayşe,\n\nSenin gözlerindeki\no tatlı bakış...\n\nSesini duymak için\nsabırsızlanıyorum.\n\nEn sevdiğim renk kahverengiydi,\nşimdi senin için mor oldu.\n\nMor senin,\nkahverengi benim.";
+var THRESHOLDS = isMobile ? [0, 20, 45, 75, 110, 150, 200] : [0, 40, 100, 180, 280, 400, 550];
 
 function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; cx = W/2; cy = H/2; }
 addEventListener('resize', resize); resize();
@@ -406,7 +406,7 @@ Dancer.prototype.update = function(prog) {
 };
 Dancer.prototype.draw = function(prog) {
     var alpha = 0.95;
-    var drawSize = textMode ? 5 : this.size;
+    var drawSize = textMode ? 3 : this.size;
     if (!this.isPurple) { if (phase < 2) alpha = 0.04 + prog * 0.35; else alpha = Math.min(0.95, 0.3 + prog * 0.6); }
     if (!textMode && !isMobile) {
         for (var i = 0; i < this.trail.length; i++) {
@@ -432,18 +432,18 @@ var purples = [], browns = [], sparkles = [], hearts = [], infinities = [], quot
 
 function init() {
     if (window.innerWidth < 768) {
-        // Mobil için minimal parçacıklar
-        stars = []; for (var i = 0; i < 20; i++) stars.push(new Star());
+        // Mobil için optimize parçacıklar
+        stars = []; for (var i = 0; i < 15; i++) stars.push(new Star());
         cosmicDust = [];
         nebulae = []; nebulae.push(new Nebula(true));
         magicOrbs = [];
         shooters = [];
-        fireflies = []; for (var i = 0; i < 5; i++) fireflies.push(new Firefly());
+        fireflies = []; for (var i = 0; i < 3; i++) fireflies.push(new Firefly());
         galaxyArms = [];
         auroraWaves = [];
-        // Kalp için daha fazla parçacık - 55 mor + 45 kahve = 100 toplam (dolu görünsün)
-        purples = []; for (var i = 0; i < 55; i++) purples.push(new Dancer(true, i, 55));
-        browns = []; for (var i = 0; i < 45; i++) browns.push(new Dancer(false, i, 45));
+        // Mobil kalp için 50 parçacık yeterli
+        purples = []; for (var i = 0; i < 28; i++) purples.push(new Dancer(true, i, 28));
+        browns = []; for (var i = 0; i < 22; i++) browns.push(new Dancer(false, i, 22));
     } else {
         stars = []; for (var i = 0; i < 120; i++) stars.push(new Star());
         cosmicDust = []; for (var i = 0; i < 80; i++) cosmicDust.push(new CosmicDust());
@@ -582,26 +582,23 @@ function startTextFormation() {
     
     var isMobile = window.innerWidth < 768;
     var isPortrait = window.innerHeight > window.innerWidth;
-    var textFontSize = isMobile ? (isPortrait ? 40 : 50) : 72;
+    var textFontSize = isMobile ? (isPortrait ? 28 : 36) : 72;
     var points = getTextPoints("SENİ SEVİYORUM", textFontSize, cx, cy);
+    // Mobilde sadece dancer parçacıkları kullan, ekstra LoveParticle ekleme
     var allDancers = purples.concat(browns);
+    var usedPoints = points.slice(0, Math.min(allDancers.length, points.length));
     
-    for (var i = 0; i < allDancers.length && i < points.length; i++) {
-        allDancers[i].textTarget = { x: points[i].x, y: points[i].y };
+    for (var i = 0; i < usedPoints.length; i++) {
+        allDancers[i].textTarget = { x: usedPoints[i].x, y: usedPoints[i].y };
     }
     
-    if (points.length > allDancers.length) {
-        for (var j = allDancers.length; j < points.length; j++) {
-            loveParticles.push(new LoveParticle(points[j].x, points[j].y, j % 2 === 0));
-        }
-    }
-    
-    // Minik kalpler
+    // Minik kalpler - yazının yanlarına değil üst ve altına koy
     setTimeout(function() {
-        var heartOffset = isMobile ? (isPortrait ? 120 : 150) : 350;
-        var heartSize = isMobile ? (isPortrait ? 10 : 15) : 25;
-        createParticleHeart(cx - heartOffset, cy, heartSize, true);
-        createParticleHeart(cx + heartOffset, cy, heartSize, false);
+        var heartOffsetY = isMobile ? (isPortrait ? 80 : 100) : 150;
+        var heartSize = isMobile ? (isPortrait ? 8 : 12) : 25;
+        // Üstte ve altta - yazıdan uzakta
+        createParticleHeart(cx, cy - heartOffsetY, heartSize, true);
+        createParticleHeart(cx, cy + heartOffsetY, heartSize, false);
         playChime();
     }, 2000);
     
@@ -695,7 +692,7 @@ function handleMove(x, y) {
     if (phase < 6) {
         var isMobile = window.innerWidth < 768;
         var isPortrait = window.innerHeight > window.innerWidth;
-        var countInc = isMobile ? (isPortrait ? 2 : 2) : 1;
+        var countInc = isMobile ? 1 : 1;
         count += countInc;
         progressBar.style.width = Math.min(100, count / THRESHOLDS[THRESHOLDS.length - 1] * 100) + '%';
         if (!isMobile && Math.random() < 0.45) sparkles.push(new Sparkle(x, y));
