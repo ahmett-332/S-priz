@@ -126,10 +126,12 @@ var started = false, nameShown = false, finalShown = false;
 var heartFrozen = false, textMode = false, loveTextShown = false;
 var audioCtx = null;
 var bgMusic = null;
+var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+var isPortrait = window.innerHeight > window.innerWidth;
 
 var quotes = ["seni düşünüyorum", "her gün", "seninle tanışmak istiyorum", "seni çok merak ediyorum", "kalbimdesin"];
 var finalText = "Ayşe,\n\nGözlerini gördüm, çok tatlıydı.\nSesini duymak için sabırsızlanıyorum.\n\nEn sevdiğim renk kahverengi,\nsenin için mor oldu.\n\nMor senin, kahverengi benim.";
-var THRESHOLDS = [0, 25, 60, 100, 150, 200, 250];
+var THRESHOLDS = isMobile ? [0, 15, 35, 55, 80, 110, 140] : [0, 40, 100, 180, 280, 400, 550];
 
 function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; cx = W/2; cy = H/2; }
 addEventListener('resize', resize); resize();
@@ -404,9 +406,9 @@ Dancer.prototype.update = function(prog) {
 };
 Dancer.prototype.draw = function(prog) {
     var alpha = 0.95;
-    var drawSize = textMode ? 2 : this.size;
+    var drawSize = textMode ? 5 : this.size;
     if (!this.isPurple) { if (phase < 2) alpha = 0.04 + prog * 0.35; else alpha = Math.min(0.95, 0.3 + prog * 0.6); }
-    if (!textMode) {
+    if (!textMode && !isMobile) {
         for (var i = 0; i < this.trail.length; i++) {
             var p = this.trail[i], trailProg = i / this.trail.length;
             ctx.beginPath(); ctx.arc(p.x, p.y, p.size * trailProg * 0.5, 0, Math.PI * 2);
@@ -415,7 +417,8 @@ Dancer.prototype.draw = function(prog) {
     }
     ctx.beginPath(); ctx.arc(this.x, this.y, drawSize, 0, Math.PI * 2);
     ctx.fillStyle = 'hsla(' + this.hue + ',' + this.sat + '%,' + (this.lit + 35) + '%,' + alpha + ')';
-    ctx.shadowColor = 'hsl(' + this.hue + ',' + this.sat + '%,' + this.lit + '%)'; ctx.shadowBlur = textMode ? 8 : 15; ctx.fill(); ctx.shadowBlur = 0;
+    if (!isMobile) { ctx.shadowColor = 'hsl(' + this.hue + ',' + this.sat + '%,' + this.lit + '%)'; ctx.shadowBlur = textMode ? 8 : 15; }
+    ctx.fill(); ctx.shadowBlur = 0;
 };
 
 // QUOTE
@@ -428,19 +431,31 @@ var stars = [], cosmicDust = [], nebulae = [], magicOrbs = [], shooters = [], fi
 var purples = [], browns = [], sparkles = [], hearts = [], infinities = [], quoteList = [], loveParticles = [];
 
 function init() {
-    var isMobile = window.innerWidth < 768;
-    var isPortrait = window.innerHeight > window.innerWidth;
-    var mult = isMobile ? (isPortrait ? 0.3 : 0.5) : 1;
-    stars = []; for (var i = 0; i < Math.floor(120 * mult); i++) stars.push(new Star());
-    cosmicDust = []; for (var i = 0; i < Math.floor(80 * mult); i++) cosmicDust.push(new CosmicDust());
-    nebulae = []; for (var i = 0; i < Math.floor(5 * mult); i++) nebulae.push(new Nebula(i % 2 === 0));
-    magicOrbs = []; for (var i = 0; i < Math.floor(30 * mult); i++) magicOrbs.push(new MagicOrb(i % 3 !== 0));
-    shooters = []; for (var i = 0; i < 3; i++) shooters.push(new ShootingStar());
-    fireflies = []; for (var i = 0; i < Math.floor(25 * mult); i++) fireflies.push(new Firefly());
-    galaxyArms = [];
-    auroraWaves = [];
-    purples = []; for (var i = 0; i < Math.floor(60 * mult); i++) purples.push(new Dancer(true, i, Math.floor(60 * mult)));
-    browns = []; for (var i = 0; i < Math.floor(50 * mult); i++) browns.push(new Dancer(false, i, Math.floor(50 * mult)));
+    if (window.innerWidth < 768) {
+        // Mobil için minimal parçacıklar
+        stars = []; for (var i = 0; i < 20; i++) stars.push(new Star());
+        cosmicDust = [];
+        nebulae = []; nebulae.push(new Nebula(true));
+        magicOrbs = [];
+        shooters = [];
+        fireflies = []; for (var i = 0; i < 5; i++) fireflies.push(new Firefly());
+        galaxyArms = [];
+        auroraWaves = [];
+        // Kalp için yeterli parçacık - 40 mor + 35 kahve = 75 toplam
+        purples = []; for (var i = 0; i < 40; i++) purples.push(new Dancer(true, i, 40));
+        browns = []; for (var i = 0; i < 35; i++) browns.push(new Dancer(false, i, 35));
+    } else {
+        stars = []; for (var i = 0; i < 120; i++) stars.push(new Star());
+        cosmicDust = []; for (var i = 0; i < 80; i++) cosmicDust.push(new CosmicDust());
+        nebulae = []; for (var i = 0; i < 5; i++) nebulae.push(new Nebula(i % 2 === 0));
+        magicOrbs = []; for (var i = 0; i < 30; i++) magicOrbs.push(new MagicOrb(i % 3 !== 0));
+        shooters = []; for (var i = 0; i < 3; i++) shooters.push(new ShootingStar());
+        fireflies = []; for (var i = 0; i < 25; i++) fireflies.push(new Firefly());
+        galaxyArms = [];
+        auroraWaves = [];
+        purples = []; for (var i = 0; i < 60; i++) purples.push(new Dancer(true, i, 60));
+        browns = []; for (var i = 0; i < 50; i++) browns.push(new Dancer(false, i, 50));
+    }
 }
 
 function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -700,8 +715,8 @@ function handleMove(x, y) {
         var countInc = isMobile ? (isPortrait ? 5 : 3) : 1;
         count += countInc;
         progressBar.style.width = Math.min(100, count / THRESHOLDS[THRESHOLDS.length - 1] * 100) + '%';
-        if (Math.random() < 0.45) sparkles.push(new Sparkle(x, y));
-        if (Math.random() < 0.025 && phase >= 1) { var sh = shooters.find(function(s) { return !s.active; }); if (sh) sh.launch(); }
+        if (!isMobile && Math.random() < 0.45) sparkles.push(new Sparkle(x, y));
+        if (!isMobile && Math.random() < 0.025 && phase >= 1) { var sh = shooters.find(function(s) { return !s.active; }); if (sh) sh.launch(); }
     }
 }
 
@@ -731,9 +746,11 @@ function animate() {
     var orbInt = Math.min(1, prog * 1.8);
     for (var i = 0; i < magicOrbs.length; i++) { magicOrbs[i].update(); magicOrbs[i].draw(orbInt * 0.7); }
     for (var i = 0; i < shooters.length; i++) { shooters[i].update(); shooters[i].draw(); }
-    var mouseGlow = ctx.createRadialGradient(mx, my, 0, mx, my, 220);
-    mouseGlow.addColorStop(0, 'rgba(200, 100, 255, 0.45)'); mouseGlow.addColorStop(0.4, 'rgba(180, 80, 220, 0.2)'); mouseGlow.addColorStop(0.7, 'rgba(220, 140, 80, 0.08)'); mouseGlow.addColorStop(1, 'transparent');
-    ctx.fillStyle = mouseGlow; ctx.beginPath(); ctx.arc(mx, my, 220, 0, Math.PI * 2); ctx.fill();
+    if (!isMobile) {
+        var mouseGlow = ctx.createRadialGradient(mx, my, 0, mx, my, 220);
+        mouseGlow.addColorStop(0, 'rgba(200, 100, 255, 0.45)'); mouseGlow.addColorStop(0.4, 'rgba(180, 80, 220, 0.2)'); mouseGlow.addColorStop(0.7, 'rgba(220, 140, 80, 0.08)'); mouseGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = mouseGlow; ctx.beginPath(); ctx.arc(mx, my, 220, 0, Math.PI * 2); ctx.fill();
+    }
     for (var i = 0; i < purples.length; i++) { purples[i].update(prog); purples[i].draw(prog); }
     for (var i = 0; i < browns.length; i++) { browns[i].update(prog); browns[i].draw(prog); }
     if (phase >= 2) {
