@@ -129,7 +129,7 @@ var bgMusic = null;
 
 var quotes = ["seni düşünüyorum", "her gün", "seninle tanışmak istiyorum", "seni çok merak ediyorum", "kalbimdesin"];
 var finalText = "Ayşe,\n\nGözlerini gördüm, çok tatlıydı.\nSesini duymak için sabırsızlanıyorum.\n\nEn sevdiğim renk kahverengi,\nsenin için mor oldu.\n\nMor senin, kahverengi benim.";
-var THRESHOLDS = [0, 40, 100, 180, 280, 400, 550];
+var THRESHOLDS = [0, 25, 60, 100, 150, 200, 250];
 
 function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; cx = W/2; cy = H/2; }
 addEventListener('resize', resize); resize();
@@ -687,7 +687,10 @@ function handleMove(x, y) {
     tmx = x; tmy = y;
     if (!started) { started = true; initAudio(); playBgMusic(); intro.classList.add('fade-out'); }
     if (phase < 6) {
-        count++; progressBar.style.width = Math.min(100, count / THRESHOLDS[THRESHOLDS.length - 1] * 100) + '%';
+        var isMobile = window.innerWidth < 768;
+        var countInc = isMobile ? 3 : 1;
+        count += countInc;
+        progressBar.style.width = Math.min(100, count / THRESHOLDS[THRESHOLDS.length - 1] * 100) + '%';
         if (Math.random() < 0.45) sparkles.push(new Sparkle(x, y));
         if (Math.random() < 0.025 && phase >= 1) { var sh = shooters.find(function(s) { return !s.active; }); if (sh) sh.launch(); }
     }
