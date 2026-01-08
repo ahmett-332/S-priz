@@ -420,14 +420,13 @@ function Quote(txt, x, y) { this.txt = txt; this.x = x; this.y = y; this.alpha =
 Quote.prototype.update = function() { this.life++; if (this.life < 55) this.alpha = Math.min(1, this.alpha + 0.022); else if (this.life > this.maxLife - 55) this.alpha = Math.max(0, this.alpha - 0.022); this.y -= 0.18; };
 Quote.prototype.draw = function() { if (this.alpha <= 0) return; ctx.save(); ctx.font = 'italic 400 clamp(18px, 2.8vw, 30px) "Cormorant Garamond", serif'; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(220, 180, 255, ' + (this.alpha * 0.95) + ')'; ctx.shadowColor = 'rgba(200, 100, 255, 0.7)'; ctx.shadowBlur = 30; ctx.fillText(this.txt, this.x, this.y); ctx.restore(); };
 Quote.prototype.isDead = function() { return this.life >= this.maxLife; };
-
 // ARRAYS
 var stars = [], cosmicDust = [], nebulae = [], magicOrbs = [], shooters = [], fireflies = [], galaxyArms = [], auroraWaves = [];
 var purples = [], browns = [], sparkles = [], hearts = [], infinities = [], quoteList = [], loveParticles = [];
 
 function init() {
     var isMobile = window.innerWidth < 768;
-    var mult = isMobile ? 0.4 : 1;
+    var mult = isMobile ? 0.15 : 1;
     stars = []; for (var i = 0; i < Math.floor(120 * mult); i++) stars.push(new Star());
     cosmicDust = []; for (var i = 0; i < Math.floor(80 * mult); i++) cosmicDust.push(new CosmicDust());
     nebulae = []; for (var i = 0; i < Math.floor(5 * mult); i++) nebulae.push(new Nebula(i % 2 === 0));
@@ -703,7 +702,9 @@ canvas.addEventListener('touchstart', function(e) { handleClick(e.touches[0].cli
 
 function animate() {
     t++; mx += (tmx - mx) * 0.07; my += (tmy - my) * 0.07; pulse *= 0.92; beat *= 0.9;
-    if (phase >= 3 && t % 70 === 0) { beat = 1; if (audioCtx && phase < 5) playBeat(); }
+    var isMobile = window.innerWidth < 768;
+    var beatInterval = isMobile ? 140 : 70;
+    if (phase >= 3 && t % beatInterval === 0) { beat = 1; if (audioCtx && phase < 5) playBeat(); }
     var prog = updatePhase();
     var bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H));
     bg.addColorStop(0, '#1a0830'); bg.addColorStop(0.2, '#10041c'); bg.addColorStop(0.45, '#08020f'); bg.addColorStop(0.7, '#040108'); bg.addColorStop(1, '#010003');
