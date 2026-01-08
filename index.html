@@ -22,17 +22,17 @@
             background: white; box-shadow: 0 0 20px #fff, 0 0 40px rgba(200,100,255,0.9);
         }
         #intro {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-family: 'Cormorant Garamond', serif; font-size: clamp(1.2rem, 3vw, 1.8rem);
-            font-weight: 400; letter-spacing: 10px; text-transform: lowercase;
-            color: rgba(255,255,255,0); z-index: 100;
-            text-shadow: 0 0 40px rgba(200,100,255,0.9), 0 0 80px rgba(180,100,220,0.6);
-            transition: all 2s ease;
-            padding: 20px 40px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 30px;
+            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+            font-family: 'Cormorant Garamond', serif; font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            font-weight: 300; letter-spacing: 4px; text-transform: lowercase;
+            color: rgba(255,255,255,0.9); z-index: 100;
+            text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            transition: opacity 1.5s ease;
+            padding: 12px 25px;
+            background: transparent;
+            pointer-events: none;
         }
-        #intro.visible { color: rgba(255,255,255,0.95); }
+        #intro.fade-out { opacity: 0; }
         #ayse-name {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.7);
             font-family: 'Great Vibes', cursive; font-size: clamp(7rem, 22vw, 18rem);
@@ -62,7 +62,12 @@
             font-weight: 300;
         }
         @media (max-width: 600px) {
-            .final-msg { padding: 30px 35px; font-size: 1.3rem; line-height: 2; max-width: 92vw; }
+            .final-msg { padding: 20px 25px; font-size: 1.1rem; line-height: 1.8; max-width: 90vw; }
+            #cursor { display: none; }
+            body { cursor: auto; }
+            #phase-dots { bottom: 70px; gap: 10px; }
+            #progress { bottom: 20px; width: 180px; }
+            #hint { bottom: 40px; font-size: 0.75rem; letter-spacing: 3px; }
         }
         .letter { display: inline-block; opacity: 0; transform: translateY(50px) rotateX(90deg); animation: letterIn 1s ease forwards; }
         @keyframes letterIn { to { opacity: 1; transform: translateY(0) rotateX(0deg); } }
@@ -475,7 +480,14 @@ function updatePhase() {
     return prog;
 }
 
-function addQuote(txt) { var x = cx + (Math.random() - 0.5) * W * 0.45, y = cy + (Math.random() - 0.5) * H * 0.3; quoteList.push(new Quote(txt, x, y)); }
+function addQuote(txt) {
+    var isMobile = window.innerWidth < 768;
+    var xRange = isMobile ? 0.2 : 0.45;
+    var yRange = isMobile ? 0.15 : 0.3;
+    var x = cx + (Math.random() - 0.5) * W * xRange;
+    var y = cy + (Math.random() - 0.5) * H * yRange;
+    quoteList.push(new Quote(txt, x, y));
+}
 
 function onPhaseChange(oldPhase, newPhase) {
     if (newPhase === 1) { hintEl.textContent = ''; intro.style.opacity = '0'; setTimeout(function() { addQuote(quotes[0]); }, 500); }
@@ -551,7 +563,9 @@ function startTextFormation() {
     loveTextShown = true;
     textMode = true;
     
-    var points = getTextPoints("SENİ SEVİYORUM", 72, cx, cy);
+    var isMobile = window.innerWidth < 768;
+    var textFontSize = isMobile ? 32 : 72;
+    var points = getTextPoints("SENİ SEVİYORUM", textFontSize, cx, cy);
     var allDancers = purples.concat(browns);
     
     for (var i = 0; i < allDancers.length && i < points.length; i++) {
@@ -566,8 +580,10 @@ function startTextFormation() {
     
     // Minik kalpler
     setTimeout(function() {
-        createParticleHeart(cx - 350, cy, 25, true);
-        createParticleHeart(cx + 350, cy, 25, false);
+        var heartOffset = isMobile ? 120 : 350;
+        var heartSize = isMobile ? 18 : 25;
+        createParticleHeart(cx - heartOffset, cy, heartSize, true);
+        createParticleHeart(cx + heartOffset, cy, heartSize, false);
         playChime();
     }, 2000);
     
@@ -670,7 +686,7 @@ function showFinal() {
 
 function handleMove(x, y) {
     tmx = x; tmy = y;
-    if (!started) { started = true; initAudio(); playBgMusic(); intro.classList.add('visible'); setTimeout(function() { intro.style.opacity = '0'; }, 3000); }
+    if (!started) { started = true; initAudio(); playBgMusic(); intro.classList.add('fade-out'); }
     if (phase < 6) {
         count++; progressBar.style.width = Math.min(100, count / THRESHOLDS[THRESHOLDS.length - 1] * 100) + '%';
         if (Math.random() < 0.45) sparkles.push(new Sparkle(x, y));
