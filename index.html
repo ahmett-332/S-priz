@@ -426,7 +426,7 @@ var purples = [], browns = [], sparkles = [], hearts = [], infinities = [], quot
 
 function init() {
     var isMobile = window.innerWidth < 768;
-    var mult = isMobile ? 0.15 : 1;
+    var mult = isMobile ? 0.3 : 1;
     stars = []; for (var i = 0; i < Math.floor(120 * mult); i++) stars.push(new Star());
     cosmicDust = []; for (var i = 0; i < Math.floor(80 * mult); i++) cosmicDust.push(new CosmicDust());
     nebulae = []; for (var i = 0; i < Math.floor(5 * mult); i++) nebulae.push(new Nebula(i % 2 === 0));
@@ -654,7 +654,9 @@ function playChime() {
 }
 
 function showFinal() {
-    if (finalShown) return; finalShown = true;
+    if (finalShown) return; 
+    if (!loveTextShown) return; 
+    finalShown = true;
     ayseName.style.opacity = '0'; secret.style.opacity = '0'; finalMsg.innerHTML = '';
     var chars = finalText.split('');
     for (var i = 0; i < chars.length; i++) {
